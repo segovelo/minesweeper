@@ -107,6 +107,7 @@ class Sentence():
         """
         if (len(self.cells) == self.count ):
             return self.cells
+        return None
 
     def known_safes(self):
         """
@@ -114,7 +115,7 @@ class Sentence():
         """
         if (self.count == 0):
             return self.cells
-        
+        return None
 
     def mark_mine(self, cell):
         """
@@ -188,13 +189,35 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        self.moves_made.add(cell)
-        self.mark_safe(cell)
-        self.knowledge.add(Sentence(cell, count))
+        
+        #self.moves_made.add(cell)
+        #self.mark_safe(cell)
+        i = cell[0]
+        j = cell[1]
+        cells = []
+        if j > 0:
+            cells.append((i,j-1))
+            if i > 0:
+                cells.append((i-1,j-1))
+            if i < self.height - 1:
+                cells.append((i+1,j-1))
+        if i > 0:
+            cells.append((i-1,j))
+        if j < self.width - 1:
+            cells.append((i,j+1))
+            if i > 0:
+                cells.append((i-1,j+1))
+            if i < self.height - 1:
+                cells.append((i+1,j+1))
+        if i < self.height - 1:
+            cells.append((i+1,j))
+        sentence = Sentence(cells, count)
+        self.knowledge.append(sentence)
+        """
         for sentence in self.knowledge:
             sentence.known_safes()
 
-
+        """
     def make_safe_move(self):
         """
         Returns a safe cell to choose on the Minesweeper board.
