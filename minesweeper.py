@@ -99,7 +99,7 @@ class Sentence():
         return self.cells == other.cells and self.count == other.count
 
     def __str__(self):
-        return f"{self.cells} = {self.count}"
+        return f"[{self.cells} = {self.count}]"
 
     def known_mines(self):
         """
@@ -121,18 +121,16 @@ class Sentence():
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
-        """
-        if cell in self.cells:
-            self.cells.remove(cell)
-            self.count -= 1
+        """        
+        self.cells.remove(cell)
+        self.count -= 1
 
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        if cell in self.cells:
-            self.cells.remove(cell)
+        self.cells.remove(cell)
 
 
 class MinesweeperAI():
@@ -163,7 +161,8 @@ class MinesweeperAI():
         """
         self.mines.add(cell)
         for sentence in self.knowledge:
-            sentence.mark_mine(cell)
+            if cell in sentence.cells:
+                sentence.mark_mine(cell)
 
     def mark_safe(self, cell):
         """
@@ -172,7 +171,8 @@ class MinesweeperAI():
         """
         self.safes.add(cell)
         for sentence in self.knowledge:
-            sentence.mark_safe(cell)
+            if cell in sentence.cells:
+                sentence.mark_safe(cell)
 
     def add_knowledge(self, cell, count):
         """
@@ -190,34 +190,50 @@ class MinesweeperAI():
                if they can be inferred from existing knowledge
         """
         
-        #self.moves_made.add(cell)
-        #self.mark_safe(cell)
+        self.moves_made.add(cell)
+        self.mark_safe(cell)
+        known_cells = self.safes.union(self.mines)
         i = cell[0]
         j = cell[1]
         cells = []
         if j > 0:
-            cells.append((i,j-1))
-            if i > 0:
+            if (i,j-1) not in known_cells:
+                cells.append((i,j-1))
+            if i > 0 and (i-1,j-1) not in known_cells:
                 cells.append((i-1,j-1))
-            if i < self.height - 1:
+            if i < self.height - 1 and (i+1,j-1) not in known_cells:
                 cells.append((i+1,j-1))
-        if i > 0:
+        if i > 0 and (i-1,j) not in known_cells:
             cells.append((i-1,j))
         if j < self.width - 1:
-            cells.append((i,j+1))
-            if i > 0:
+            if (i,j+1) not in known_cells:
+                cells.append((i,j+1))
+            if i > 0 and (i-1,j+1) not in known_cells:
                 cells.append((i-1,j+1))
-            if i < self.height - 1:
+            if i < self.height - 1 and (i+1,j+1) not in known_cells:
                 cells.append((i+1,j+1))
-        if i < self.height - 1:
+        if i < self.height - 1 and (i+1,j) not in known_cells:
             cells.append((i+1,j))
+        known_cells.add((i,j))    
         sentence = Sentence(cells, count)
+        print("Sentence in AI : ",sentence.__str__())
         self.knowledge.append(sentence)
-        """
+        safe_cells = set()
+        mine_cells = set()
         for sentence in self.knowledge:
-            sentence.known_safes()
+            cells = sentence.known_safes()
+            if cells:
+                cells = list(cells)
+                for cell in cells:
+                    sentence.mark_safe(cell)
+            else:
+                cells = sentence.known_mines()
+                if cells:
+                    cells = list(cells)
+                    for cell in cells:
+                        sentence.mark_mine(cell)
 
-        """
+        
     def make_safe_move(self):
         """
         Returns a safe cell to choose on the Minesweeper board.
@@ -229,6 +245,7 @@ class MinesweeperAI():
         """
         for cell in self.safes:
             if cell not in self.moves_made:
+                self.moves_made.add(cell)
                 return cell
         return None
 
@@ -239,4 +256,10 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+        while True:
+            i = random.randint(0, self.width - 1)
+            j = random.randint(0, self.height - 1)
+            cell = (i,j)
+            if cell not in self.moves_made and cell not in self.mines:
+                self.moves_made.add(cell)
+                return cell
