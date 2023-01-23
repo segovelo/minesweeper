@@ -132,6 +132,9 @@ class Sentence():
         """
         self.cells.remove(cell)
 
+    def get_cells(self):
+        return self.cells
+
 
 class MinesweeperAI():
     """
@@ -146,6 +149,10 @@ class MinesweeperAI():
 
         # Keep track of which cells have been clicked on
         self.moves_made = set()
+        self.pot_moves = set()
+        for i in range(self.height):
+            for j in range(self.width):
+                self.pot_moves.add((i,j))
 
         # Keep track of cells known to be safe or mines
         self.mines = set()
@@ -160,8 +167,9 @@ class MinesweeperAI():
         to mark that cell as a mine as well.
         """
         self.mines.add(cell)
+        self.remove_moves(cell)
         for sentence in self.knowledge:
-            if cell in sentence.cells:
+            if cell in sentence.get_cells():
                 sentence.mark_mine(cell)
 
     def mark_safe(self, cell):
@@ -170,8 +178,9 @@ class MinesweeperAI():
         to mark that cell as safe as well.
         """
         self.safes.add(cell)
+        self.remove_moves(cell)
         for sentence in self.knowledge:
-            if cell in sentence.cells:
+            if cell in sentence.get_cells():
                 sentence.mark_safe(cell)
 
     def add_knowledge(self, cell, count):
@@ -214,24 +223,26 @@ class MinesweeperAI():
                 cells.append((i+1,j+1))
         if i < self.height - 1 and (i+1,j) not in known_cells:
             cells.append((i+1,j))
-        known_cells.add((i,j))    
+
         sentence = Sentence(cells, count)
+        print("============================================")
+        print(f"cell: {cell} clicked")
         print("Sentence in AI : ",sentence.__str__())
         self.knowledge.append(sentence)
         safe_cells = set()
         mine_cells = set()
         for sentence in self.knowledge:
-            cells = sentence.known_safes()
-            if cells:
-                cells = list(cells)
-                for cell in cells:
-                    sentence.mark_safe(cell)
-            else:
-                cells = sentence.known_mines()
-                if cells:
-                    cells = list(cells)
-                    for cell in cells:
-                        sentence.mark_mine(cell)
+            safe_cells = sentence.known_safes()
+            if safe_cells:
+                for c in safe_cells:
+                    self.safes.add(c)
+                    
+            mine_cells = sentence.known_mines()
+            if mine_cells:
+                for c in mine_cells:
+                    self.mines.add(c)
+
+
 
         
     def make_safe_move(self):
@@ -256,6 +267,16 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
+        """
+        risk = 100000
+        pot_moves = []
+        for i in range(self.height):
+            for j in range(self.width):
+                cell = (i,j)
+                if cell not in self.moves_made and cell not in self.mines:
+                    if risk > 
+                    pot_moves.insert(0,cell)
+        
         while True:
             i = random.randint(0, self.width - 1)
             j = random.randint(0, self.height - 1)
@@ -263,3 +284,12 @@ class MinesweeperAI():
             if cell not in self.moves_made and cell not in self.mines:
                 self.moves_made.add(cell)
                 return cell
+        """
+        if self.pot_moves:
+            return self.pot_moves.pop()
+        else:
+            print("No more random moves")
+
+    def remove_moves(self, cell):
+        if cell in self.pot_moves:
+            self.pot_moves.remove(cell)
