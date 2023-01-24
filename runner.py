@@ -1,7 +1,7 @@
 import pygame
 import sys
 import time
-
+import os 
 from minesweeper import Minesweeper, MinesweeperAI
 
 HEIGHT = 8
@@ -199,6 +199,7 @@ while True:
             revealed = set()
             flags = set()
             lost = False
+            os.system("cls")
             continue
 
         # User-made move
@@ -214,6 +215,7 @@ while True:
     if move:
         if game.is_mine(move):
             lost = True
+            print(f"The cell {move} contains a mine")
         else:
             nearby = game.nearby_mines(move)
             revealed.add(move)

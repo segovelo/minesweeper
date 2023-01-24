@@ -224,23 +224,28 @@ class MinesweeperAI():
         if i < self.height - 1 and (i+1,j) not in known_cells:
             cells.append((i+1,j))
 
-        sentence = Sentence(cells, count)
-        print("============================================")
-        print(f"cell: {cell} clicked")
-        print("Sentence in AI : ",sentence.__str__())
-        self.knowledge.append(sentence)
-        safe_cells = set()
-        mine_cells = set()
-        for sentence in self.knowledge:
-            safe_cells = sentence.known_safes()
-            if safe_cells:
-                for c in safe_cells:
-                    self.safes.add(c)
-                    
-            mine_cells = sentence.known_mines()
-            if mine_cells:
-                for c in mine_cells:
-                    self.mines.add(c)
+        if len(cells) > 0:
+            sentence = Sentence(cells, count)      
+            print(f"cell: {cell} clicked")
+            print("Sentence in AI : ",sentence.__str__())
+            self.knowledge.append(sentence)
+            safe_cells = set()
+            mine_cells = set()
+            for sentence in self.knowledge:
+                safe_cells = sentence.known_safes()
+                print(f"From sentence.known_safes() -> safe_cells : {safe_cells}")
+                if safe_cells:
+                    for c in safe_cells:
+                        self.safes.add(c)
+                        
+                mine_cells = sentence.known_mines()
+                if mine_cells:
+                    for c in mine_cells:
+                        self.mines.add(c)
+        else:
+            print(f"cell: {cell} did not add any sentence to AI")
+        print("===================================================================================")
+
 
 
 
@@ -289,6 +294,7 @@ class MinesweeperAI():
             return self.pot_moves.pop()
         else:
             print("No more random moves")
+        return None
 
     def remove_moves(self, cell):
         if cell in self.pot_moves:
