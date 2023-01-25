@@ -168,7 +168,6 @@ class MinesweeperAI():
         """
         self.mines.union(cell)
         self.remove_moves(cell)
-        mines = set()
         for sentence in self.knowledge:
             if cell.issubset(sentence.get_cells()):
                 sentence.mark_mine(cell)
@@ -179,7 +178,7 @@ class MinesweeperAI():
         to mark that cell as safe as well.
         """
         self.safes.add(cell)
-        self.remove_moves(cell)
+        self.remove_moves(set([cell]))
         for sentence in self.knowledge:
             if cell in sentence.get_cells():
                 sentence.mark_safe(cell)
@@ -244,12 +243,14 @@ class MinesweeperAI():
                 if mine_cells:
                     print(f"From sentence.known_mines() -> mine_cells : {mine_cells}")
                     self.mark_mine(mine_cells)
-                if bool(safe_cells) and bool(mine_cells):
-                    sentences_to_remove.add(sentence)
+                if not bool(sentence.get_cells()):
+                    sentences_to_remove.append(sentence)
             for sentence in sentences_to_remove:
                 self.knowledge.remove(sentence)
         else:
             print(f"cell: {cell} did not add any sentence to AI")
+        if len(self.mines) > 0:
+            print(f"self.mines : {self.mines}")
         print("===================================================================================")
 
 
@@ -303,5 +304,4 @@ class MinesweeperAI():
         return None
 
     def remove_moves(self, cell):
-        if cell in self.pot_moves:
-            self.pot_moves.remove(cell)
+        self.pot_moves.difference_update(cell)
