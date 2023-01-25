@@ -121,10 +121,10 @@ class Sentence():
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
-        """        
-        self.cells.remove(cell)
-        self.count -= 1
-
+        """ 
+        self.count -= len(cell)
+        self.cells.difference_update(cell)
+        
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
@@ -166,10 +166,11 @@ class MinesweeperAI():
         Marks a cell as a mine, and updates all knowledge
         to mark that cell as a mine as well.
         """
-        self.mines.add(cell)
+        self.mines.union(cell)
         self.remove_moves(cell)
+        mines = set()
         for sentence in self.knowledge:
-            if cell in sentence.get_cells():
+            if cell.issubset(sentence.get_cells()):
                 sentence.mark_mine(cell)
 
     def mark_safe(self, cell):
@@ -201,29 +202,29 @@ class MinesweeperAI():
         
         self.moves_made.add(cell)
         self.mark_safe(cell)
-        known_cells = self.safes.union(self.mines)
         i = cell[0]
         j = cell[1]
-        cells = []
+        cells = set()
         if j > 0:
-            if (i,j-1) not in known_cells:
-                cells.append((i,j-1))
-            if i > 0 and (i-1,j-1) not in known_cells:
-                cells.append((i-1,j-1))
-            if i < self.height - 1 and (i+1,j-1) not in known_cells:
-                cells.append((i+1,j-1))
-        if i > 0 and (i-1,j) not in known_cells:
-            cells.append((i-1,j))
+            cells.add((i,j-1))
+            if i > 0:
+                cells.add((i-1,j-1))
+            if i < self.height - 1:
+                cells.add((i+1,j-1))
+        if i > 0:
+            cells.add((i-1,j))
         if j < self.width - 1:
-            if (i,j+1) not in known_cells:
-                cells.append((i,j+1))
-            if i > 0 and (i-1,j+1) not in known_cells:
-                cells.append((i-1,j+1))
-            if i < self.height - 1 and (i+1,j+1) not in known_cells:
-                cells.append((i+1,j+1))
-        if i < self.height - 1 and (i+1,j) not in known_cells:
-            cells.append((i+1,j))
+            cells.add((i,j+1))
+            if i > 0:
+                cells.add((i-1,j+1))
+            if i < self.height - 1:
+                cells.add((i+1,j+1))
+        if i < self.height - 1:
+            cells.add((i+1,j))
 
+        cells.difference_update(self.safes)
+        count -= len(cells.intersection(self.mines)) 
+        cells.difference_update(self.mines)
         if len(cells) > 0:
             sentence = Sentence(cells, count)      
             print(f"cell: {cell} clicked")
@@ -231,17 +232,22 @@ class MinesweeperAI():
             self.knowledge.append(sentence)
             safe_cells = set()
             mine_cells = set()
+            sentences_to_remove = []
             for sentence in self.knowledge:
-                safe_cells = sentence.known_safes()
-                print(f"From sentence.known_safes() -> safe_cells : {safe_cells}")
+                safe_cells = sentence.known_safes()                
                 if safe_cells:
+                    print(f"From sentence.known_safes() -> safe_cells : {safe_cells}")
                     for c in safe_cells:
                         self.safes.add(c)
                         
-                mine_cells = sentence.known_mines()
+                mine_cells = sentence.known_mines()                
                 if mine_cells:
-                    for c in mine_cells:
-                        self.mines.add(c)
+                    print(f"From sentence.known_mines() -> mine_cells : {mine_cells}")
+                    self.mark_mine(mine_cells)
+                if bool(safe_cells) and bool(mine_cells):
+                    sentences_to_remove.add(sentence)
+            for sentence in sentences_to_remove:
+                self.knowledge.remove(sentence)
         else:
             print(f"cell: {cell} did not add any sentence to AI")
         print("===================================================================================")

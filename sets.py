@@ -1,0 +1,12 @@
+s1 = set([1,2,3,4,5,6])
+s2 = set([5,6,7,8,9])
+s3 = set([1,2])
+
+print(f"{s1} intersection {s2} = {s1.intersection(s2)}")
+print(f"{s1} difference {s2} = {s1.difference(s2)}")
+print(f"{s2} difference {s1} = {s2.difference(s1)}")
+s1.difference_update(s2)
+print(f"{s1} difference_update {s2} = {s1}")
+print(f"s1 = {s1} After difference_update")
+print(f"{s1} is superset {s3} ?  {s1.issuperset(s3)}")
+print(f"{s3} is subset {s1} ?  {s3.issubset(s1)}")
