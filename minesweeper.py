@@ -166,7 +166,7 @@ class MinesweeperAI():
         Marks a cell as a mine, and updates all knowledge
         to mark that cell as a mine as well.
         """
-        self.mines.union(cell)
+        self.mines.update(cell)
         self.remove_moves(cell)
         for sentence in self.knowledge:
             if cell.issubset(sentence.get_cells()):
