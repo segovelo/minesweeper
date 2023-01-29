@@ -135,6 +135,9 @@ class Sentence():
     def get_cells(self):
         return self.cells
 
+    def get_count(self):
+        return self.count
+
 
 class MinesweeperAI():
     """
@@ -201,8 +204,7 @@ class MinesweeperAI():
         
         self.moves_made.add(cell)
         self.mark_safe(cell)
-        i = cell[0]
-        j = cell[1]
+        i, j = cell
         cells = set()
         if j > 0:
             cells.add((i,j-1))
@@ -229,6 +231,32 @@ class MinesweeperAI():
             print(f"cell: {cell} clicked")
             print("Sentence in AI : ",sentence.__str__())
             self.knowledge.append(sentence)
+
+            sentences_to_add = []
+            for i in range(len(self.knowledge) - 1):
+                for j in range((i+1), len(self.knowledge)):
+                    if not self.knowledge[i].__eq__(self.knowledge[j]):
+                        s1 = self.knowledge[i].get_cells()
+                        s2 = self.knowledge[j].get_cells()
+                        c1 = self.knowledge[i].get_count()
+                        c2 = self.knowledge[j].get_count()
+                        if s2.issubset(s1) and c1 >= c2:
+                            s3 = s1.difference(s2)
+                            c3 = c1 - c2
+                            res_sentence = Sentence(s3,c3)
+                            sentences_to_add.append(res_sentence)
+                            print("resulting sentence : ", res_sentence.__str__())
+                        elif s1.issubset(s2) and c2 >= c1:
+                            s3 = s2.difference(s1)
+                            c3 = c2 - c1
+                            res_sentence = Sentence(s3,c3)
+                            sentences_to_add.append(res_sentence)
+                            print("resulting sentence : ", res_sentence.__str__())
+            for i in range(len(sentences_to_add)):
+                if sentences_to_add[i] not in self.knowledge:
+                    self.knowledge.append(sentences_to_add[i])
+    
+
             safe_cells = set()
             mine_cells = set()
             sentences_to_remove = []
@@ -279,26 +307,12 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        """
-        risk = 100000
-        pot_moves = []
-        for i in range(self.height):
-            for j in range(self.width):
-                cell = (i,j)
-                if cell not in self.moves_made and cell not in self.mines:
-                    if risk > 
-                    pot_moves.insert(0,cell)
-        
-        while True:
-            i = random.randint(0, self.width - 1)
-            j = random.randint(0, self.height - 1)
-            cell = (i,j)
-            if cell not in self.moves_made and cell not in self.mines:
-                self.moves_made.add(cell)
-                return cell
-        """
         if self.pot_moves:
-            return self.pot_moves.pop()
+            moves_list = list(self.pot_moves)
+            i = random.randrange(len(moves_list))
+            move = moves_list[i]
+            self.pot_moves.remove(move)
+            return move
         else:
             print("No more random moves")
         return None
