@@ -230,7 +230,8 @@ class MinesweeperAI():
             sentence = Sentence(cells, count)      
             print(f"cell: {cell} clicked")
             print("Sentence in AI : ",sentence.__str__())
-            self.knowledge.append(sentence)
+            if sentence not in self.knowledge:
+                self.knowledge.append(sentence)
 
             sentences_to_add = []
             for i in range(len(self.knowledge) - 1):
