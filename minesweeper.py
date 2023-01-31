@@ -232,9 +232,9 @@ class MinesweeperAI():
                             res_sentence = Sentence(s3,c3)
                             sentences_to_add.append(res_sentence)
                             print("resulting sentence : ", res_sentence.__str__())
-            for i in range(len(sentences_to_add)):
-                if sentences_to_add[i] not in self.knowledge:
-                    self.knowledge.append(sentences_to_add[i])
+            for sentence in sentences_to_add:
+                if sentence not in self.knowledge:
+                    self.knowledge.append(sentence)
     
 
             safe_cells = set()
