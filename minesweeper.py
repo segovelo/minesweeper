@@ -204,30 +204,9 @@ class MinesweeperAI():
         
         self.moves_made.add(cell)
         self.mark_safe(cell)
-        i, j = cell
-        cells = set()
-        if j > 0:
-            cells.add((i,j-1))
-            if i > 0:
-                cells.add((i-1,j-1))
-            if i < self.height - 1:
-                cells.add((i+1,j-1))
-        if i > 0:
-            cells.add((i-1,j))
-        if j < self.width - 1:
-            cells.add((i,j+1))
-            if i > 0:
-                cells.add((i-1,j+1))
-            if i < self.height - 1:
-                cells.add((i+1,j+1))
-        if i < self.height - 1:
-            cells.add((i+1,j))
-
-        cells.difference_update(self.safes)
-        count -= len(cells.intersection(self.mines)) 
-        cells.difference_update(self.mines)
-        if len(cells) > 0:
-            sentence = Sentence(cells, count)      
+        sentence = self.get_sentence(cell, count)
+        if sentence:
+            #sentence = Sentence(cells_to_sentence, count)      
             print(f"cell: {cell} clicked")
             print("Sentence in AI : ",sentence.__str__())
             if sentence not in self.knowledge:
@@ -282,7 +261,33 @@ class MinesweeperAI():
             print(f"self.mines : {self.mines}")
         print("===================================================================================")
 
+    def get_sentence(self, cell, count):
+        i, j = cell
+        cells = set()
+        if j > 0:
+            cells.add((i,j-1))
+            if i > 0:
+                cells.add((i-1,j-1))
+            if i < self.height - 1:
+                cells.add((i+1,j-1))
+        if i > 0:
+            cells.add((i-1,j))
+        if j < self.width - 1:
+            cells.add((i,j+1))
+            if i > 0:
+                cells.add((i-1,j+1))
+            if i < self.height - 1:
+                cells.add((i+1,j+1))
+        if i < self.height - 1:
+            cells.add((i+1,j))
 
+        cells.difference_update(self.safes)
+        count -= len(cells.intersection(self.mines)) 
+        cells.difference_update(self.mines)
+        if len(cells) > 0:
+            return Sentence(cells, count)
+        else:
+            return None
 
 
         
