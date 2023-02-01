@@ -130,7 +130,7 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        self.cells.remove(cell)
+        self.cells.difference_update(cell)
 
     def get_cells(self):
         return self.cells
@@ -180,10 +180,10 @@ class MinesweeperAI():
         Marks a cell as safe, and updates all knowledge
         to mark that cell as safe as well.
         """
-        self.safes.add(cell)
-        self.remove_moves(set([cell]))
+        self.safes.update(cell)
+        self.remove_moves(cell)
         for sentence in self.knowledge:
-            if cell in sentence.get_cells():
+            if cell.issubset(sentence.get_cells()):
                 sentence.mark_safe(cell)
 
     def add_knowledge(self, cell, count):
@@ -203,16 +203,15 @@ class MinesweeperAI():
         """
         
         self.moves_made.add(cell)
-        self.mark_safe(cell)
+        self.mark_safe(set([cell]))
         sentence = self.get_sentence(cell, count)
-        if sentence:
-            #sentence = Sentence(cells_to_sentence, count)      
+        if sentence:    
             print(f"cell: {cell} clicked")
             print("Sentence in AI : ",sentence.__str__())
             if sentence not in self.knowledge:
                 self.knowledge.append(sentence)
 
-            sentences_to_add = []
+            inferred_sentences = []
             for i in range(len(self.knowledge) - 1):
                 for j in range((i+1), len(self.knowledge)):
                     if not self.knowledge[i].__eq__(self.knowledge[j]):
@@ -224,39 +223,44 @@ class MinesweeperAI():
                             s3 = s1.difference(s2)
                             c3 = c1 - c2
                             res_sentence = Sentence(s3,c3)
-                            sentences_to_add.append(res_sentence)
-                            print("resulting sentence : ", res_sentence.__str__())
+                            inferred_sentences.append(res_sentence)                            
                         elif s1.issubset(s2) and c2 >= c1:
                             s3 = s2.difference(s1)
                             c3 = c2 - c1
                             res_sentence = Sentence(s3,c3)
-                            sentences_to_add.append(res_sentence)
-                            print("resulting sentence : ", res_sentence.__str__())
-            for sentence in sentences_to_add:
+                            inferred_sentences.append(res_sentence)
+
+            for sentence in inferred_sentences:
                 if sentence not in self.knowledge:
+                    print("Inferred sentence : ", sentence.__str__())
                     self.knowledge.append(sentence)
     
 
             safe_cells = set()
             mine_cells = set()
             sentences_to_remove = []
+            i = 0
             for sentence in self.knowledge:
                 safe_cells = sentence.known_safes()                
                 if safe_cells:
-                    print(f"From sentence.known_safes() -> safe_cells : {safe_cells}")
-                    for c in safe_cells:
-                        self.safes.add(c)
-                        
+                    print(f"From sentence.known_safes() -> safe_cells : {safe_cells}")                
+                    self.mark_safe(safe_cells)
+        
                 mine_cells = sentence.known_mines()                
                 if mine_cells:
                     print(f"From sentence.known_mines() -> mine_cells : {mine_cells}")
                     self.mark_mine(mine_cells)
-                if not bool(sentence.get_cells()):
+                if len(sentence.get_cells()) == 0:
                     sentences_to_remove.append(sentence)
             for sentence in sentences_to_remove:
                 self.knowledge.remove(sentence)
         else:
             print(f"cell: {cell} did not add any sentence to AI")
+        i = 0
+        for sentence in self.knowledge:
+            print(f"Sentence-{i} : {sentence}")
+            i += 1
+
         if len(self.mines) > 0:
             print(f"self.mines : {self.mines}")
         print("===================================================================================")

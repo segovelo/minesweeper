@@ -13,3 +13,11 @@ print(f"{s3} is subset {s1} ?  {s3.issubset(s1)}")
 s1 = set([1,2,3,4,5,6])
 print(f"{s1} update {s2} = {s1.update(s2)}")
 print(f"s1 : {s1}")
+
+l1 = [1,2,3,4,5,6]
+l2 = [1,2,3,4]
+l3 = []
+
+print(f"List_1 : {l1} Union List_2 : {l2}  ->  ")
+l2.extend([item for item in l1 if item not in l2])
+print(l2)
