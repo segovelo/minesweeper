@@ -122,8 +122,10 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """ 
+        print(f"self.count before : {self.count}")
         self.count -= len(cell)
         self.cells.difference_update(cell)
+        print(f"self.count After : {self.count}")
         
     def mark_safe(self, cell):
         """
