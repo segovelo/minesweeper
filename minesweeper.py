@@ -123,7 +123,7 @@ class Sentence():
         a cell is known to be a mine.
         """ 
         print(f"self.count before : {self.count}")
-        self.count -= len(cell)
+        self.count -= len(self.cells.intersection(cell))
         self.cells.difference_update(cell)
         print(f"self.count After : {self.count}")
         
@@ -174,7 +174,7 @@ class MinesweeperAI():
         self.mines.update(cell)
         self.remove_moves(cell)
         for sentence in self.knowledge:
-            if cell.issubset(sentence.get_cells()):
+            #if cell.issubset(sentence.get_cells()):
                 sentence.mark_mine(cell)
 
     def mark_safe(self, cell):
@@ -185,7 +185,7 @@ class MinesweeperAI():
         self.safes.update(cell)
         self.remove_moves(cell)
         for sentence in self.knowledge:
-            if cell.issubset(sentence.get_cells()):
+            #if cell.issubset(sentence.get_cells()):
                 sentence.mark_safe(cell)
 
     def add_knowledge(self, cell, count):
